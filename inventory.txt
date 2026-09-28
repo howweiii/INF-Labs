@@ -1,0 +1,4 @@
+129
+1001,laptop,2
+1002,keyboard,2
+1004,handphone,2
