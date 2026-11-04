@@ -2,6 +2,9 @@ import json
 import os
 
 FILENAME = "inventory.json"
+# DATA_DIR lets Docker point the file at a mounted volume (default: current folder)
+DATA_DIR = os.environ.get("DATA_DIR", ".")
+FILEPATH = os.path.join(DATA_DIR, FILENAME)
 LINE = "-" * 49
 
 # Inventory dictionary: a list of product dictionaries + a history of
@@ -127,10 +130,10 @@ def remove_product():
 
 def load_inventory():
     global inventory
-    if os.path.exists(FILENAME):
+    if os.path.exists(FILEPATH):
         print(f"{FILENAME} found.")
         try:
-            with open(FILENAME, "r") as f:
+            with open(FILEPATH, "r") as f:
                 inventory = json.load(f)
             inventory.setdefault("products", [])
             inventory.setdefault("transactions", [])
@@ -144,7 +147,8 @@ def load_inventory():
 
 
 def save_inventory():
-    with open(FILENAME, "w") as f:
+    os.makedirs(DATA_DIR, exist_ok=True)
+    with open(FILEPATH, "w") as f:
         json.dump(inventory, f, indent=4)
 
 

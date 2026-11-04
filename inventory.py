@@ -1,4 +1,5 @@
 from product import Product
+from factory import product_from_dict
 
 LINE = "-" * 49
 
@@ -61,10 +62,9 @@ class Inventory:
     @classmethod
     def from_dict(cls, data):
         inventory = cls()
-        # Accept the old plain-list format as well as the new dict format
         if isinstance(data, list):
             data = {"products": data, "transactions": []}
         for item in data.get("products", []):
-            inventory.__products.append(Product.from_dict(item))
+            inventory.__products.append(product_from_dict(item))
         inventory.__transactions = data.get("transactions", [])
         return inventory

@@ -1,5 +1,8 @@
-class Product:
-    """Represents and manages a single product."""
+from abc import ABC, abstractmethod
+
+
+class Product(ABC):
+    """Abstract base class for every product in the inventory."""
 
     def __init__(self, product_id, name, price, stock):
         if not str(product_id).strip():
@@ -32,6 +35,11 @@ class Product:
     def stock(self):
         return self.__stock
 
+    @abstractmethod
+    def get_fulfilment_info(self):
+        """Describe how this product is delivered to the customer."""
+        pass
+
     def update_stock(self, quantity):
         """Set stock to a new quantity. Returns the change in stock."""
         if quantity < 0:
@@ -49,10 +57,6 @@ class Product:
     def to_dict(self):
         return {"id": self.__product_id, "name": self.__name,
                 "price": self.__price, "stock": self.__stock}
-
-    @classmethod
-    def from_dict(cls, data):
-        return cls(data["id"], data["name"], data["price"], data["stock"])
 
     def __str__(self):
         return (f"ID: {self.__product_id} | Name: {self.__name} | "

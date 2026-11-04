@@ -1,7 +1,9 @@
 import json
 import os
 
-from product import Product
+from physical import PhysicalProduct
+from digital import DigitalProduct
+from shipping import Shipping
 from inventory import Inventory
 
 FILENAME = "inventory.json"
@@ -50,11 +52,25 @@ def add_product(inventory):
     if inventory.search_product(product_id):
         print("\nA product with that ID already exists.")
         return
+
+    print("\nProduct Type")
+    print("1. Physical")
+    print("2. Digital")
+    product_type = input("Choose type (1/2): ").strip()
+    if product_type not in ("1", "2"):
+        print("\nInvalid product type. Product not added.")
+        return
+
     name = input("Product Name: ").strip()
     try:
         price = float(input("Price: "))
         stock = int(input("Stock Quantity: "))
-        product = Product(product_id, name, price, stock)
+        if product_type == "1":
+            weight = float(input("Weight (kg): "))
+            product = PhysicalProduct(product_id, name, price, stock, weight)
+        else:
+            size = float(input("Download Size (MB): "))
+            product = DigitalProduct(product_id, name, price, stock, size)
     except ValueError as e:
         print(f"\nInvalid input. Product not added. ({e})")
         return
@@ -91,6 +107,9 @@ def search_product(inventory):
     print("\nProduct Found")
     print(LINE)
     product.display_information()
+    print(f"Fulfilment: {product.get_fulfilment_info()}")
+    if isinstance(product, Shipping):
+        print(f"Shipping Cost: ${product.calculate_shipping_cost():.2f}")
     print(LINE)
 
 

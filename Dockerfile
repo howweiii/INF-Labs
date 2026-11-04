@@ -1,7 +1,10 @@
-FROM python:3.11-slim
+FROM python:3.12-slim
 
 WORKDIR /app
 
-COPY auditor.py .
+ENV PYTHONUNBUFFERED=1
+ENV DATA_DIR=/app
 
-CMD ["python", "auditor.py"]
+COPY main.py product.py inventory.py inventory.json ./
+
+CMD ["python", "main.py"]

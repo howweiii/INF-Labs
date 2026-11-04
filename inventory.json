@@ -1,22 +1,32 @@
 {
     "products": [
         {
-            "id": "P2026",
-            "name": "Laptop",
-            "price": 9999.0,
-            "stock": 5
+            "id": "P1",
+            "name": "Guitar",
+            "price": 800.0,
+            "stock": 2,
+            "type": "physical",
+            "weight": 3.8
+        },
+        {
+            "id": "D1",
+            "name": "Operating System",
+            "price": 129.0,
+            "stock": 10,
+            "type": "digital",
+            "download_size": 4500.0
         }
     ],
     "transactions": [
         {
-            "product_id": "P2026",
+            "product_id": "P1",
             "type": "add",
-            "amount": 999900.0
+            "amount": 1600.0
         },
         {
-            "product_id": "P2026",
-            "type": "update",
-            "amount": -949905.0
+            "product_id": "D1",
+            "type": "add",
+            "amount": 1290.0
         }
     ]
 }

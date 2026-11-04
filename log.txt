@@ -1,3 +1,45 @@
+commit 2ecd84de63dd4ace16a2271735054124376ae075
+Author: HOW WEI <2602971@sit.singaporetech.edu.sg>
+Date:   Fri Oct 30 00:29:38 2026 +0800
+
+    Added product.py inventory.py main.py inventory.json
+
+commit 309b964f119b48e5b560756aa2948ce9d2346e01
+Author: HOW WEI <2602971@sit.singaporetech.edu.sg>
+Date:   Wed Oct 7 23:00:29 2026 +0800
+
+    Add load_inventory() to load data from inventory.json
+
+commit 3e6fb8ef0071f90f6726b8eea6a13fed3f7519d8
+Author: HOW WEI <2602971@sit.singaporetech.edu.sg>
+Date:   Wed Oct 7 22:59:32 2026 +0800
+
+    Create inventory dictionary and add products
+
+commit 1b87270c11f783f77f4e898953f28aa4b04ec6ca
+Author: HOW WEI <2602971@sit.singaporetech.edu.sg>
+Date:   Mon Sep 28 19:24:09 2026 +0800
+
+    feat: enable order history tracking across transactions
+
+commit 63b74f6170e8b006ed70019f6cca2161e089260e
+Author: HOW WEI <2602971@sit.singaporetech.edu.sg>
+Date:   Mon Sep 28 19:16:36 2026 +0800
+
+    Persistant_Auditor
+
+commit 40aff266505883511b0c35e8e593b871111c0c7d
+Author: HOW WEI <2602971@sit.singaporetech.edu.sg>
+Date:   Sun Sep 20 23:16:16 2026 +0800
+
+    FInal Summary Function
+
+commit 4c4a183b927e193c94301d991906cbb1dc1adb48
+Author: HOW WEI <2602971@sit.singaporetech.edu.sg>
+Date:   Sun Sep 20 23:07:58 2026 +0800
+
+    feat: Add input validation and core inventory functions
+
 commit 74d0b51b5da651b527d2cd40ab55734fa92c341b
 Author: HOW WEI <2602971@sit.singaporetech.edu.sg>
 Date:   Fri Sep 11 15:33:12 2026 +0800
