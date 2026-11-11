@@ -1,10 +1,23 @@
 {
+    "suppliers": [
+        {
+            "id": "S1",
+            "name": "Harmony Instruments",
+            "contact_email": "sales@harmonyinstruments.com"
+        },
+        {
+            "id": "S2",
+            "name": "Digital Source Ltd",
+            "contact_email": "support@digitalsource.com"
+        }
+    ],
     "products": [
         {
             "id": "P1",
             "name": "Guitar",
             "price": 800.0,
             "stock": 2,
+            "supplier_id": "S1",
             "type": "physical",
             "weight": 3.8
         },
@@ -13,8 +26,27 @@
             "name": "Operating System",
             "price": 129.0,
             "stock": 10,
+            "supplier_id": "S2",
             "type": "digital",
             "download_size": 4500.0
+        },
+        {
+            "id": "P2",
+            "name": "Keyboard",
+            "price": 99.0,
+            "stock": 45,
+            "supplier_id": "S1",
+            "type": "physical",
+            "weight": 2.0
+        },
+        {
+            "id": "D2",
+            "name": "MSOFT",
+            "price": 50.0,
+            "stock": 5,
+            "supplier_id": "S2",
+            "type": "digital",
+            "download_size": 900.0
         }
     ],
     "transactions": [
@@ -27,6 +59,21 @@
             "product_id": "D1",
             "type": "add",
             "amount": 1290.0
+        },
+        {
+            "product_id": "P2",
+            "type": "add",
+            "amount": 4950.0
+        },
+        {
+            "product_id": "P2",
+            "type": "update",
+            "amount": -495.0
+        },
+        {
+            "product_id": "D2",
+            "type": "add",
+            "amount": 250.0
         }
     ]
 }
