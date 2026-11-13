@@ -1,3 +1,9 @@
+commit fc65aeaf02582fe56584ba3e63d26a6163e7c56c
+Author: HOW WEI <2602971@sit.singaporetech.edu.sg>
+Date:   Sat Nov 14 02:29:55 2026 +0800
+
+    Lab 9: add discount strategies, ProductFactory, input validation and CSV loading
+
 commit acb7a49ce6241a996b44f310cd4b9c7281558815
 Author: HOW WEI <2602971@sit.singaporetech.edu.sg>
 Date:   Wed Nov 11 11:48:42 2026 +0800
