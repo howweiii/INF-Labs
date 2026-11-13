@@ -1,3 +1,15 @@
+commit acb7a49ce6241a996b44f310cd4b9c7281558815
+Author: HOW WEI <2602971@sit.singaporetech.edu.sg>
+Date:   Wed Nov 11 11:48:42 2026 +0800
+
+    Lab8
+
+commit 23d3fb52eddcb6302776f6580079243419f5d22a
+Author: HOW WEI <2602971@sit.singaporetech.edu.sg>
+Date:   Wed Nov 4 16:20:40 2026 +0800
+
+    Lab 7: add inheritance, abstract Product, shipping
+
 commit 2ecd84de63dd4ace16a2271735054124376ae075
 Author: HOW WEI <2602971@sit.singaporetech.edu.sg>
 Date:   Fri Oct 30 00:29:38 2026 +0800

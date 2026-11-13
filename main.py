@@ -1,7 +1,8 @@
+import csv
 import json
 import os
 
-from product import PhysicalProduct, DigitalProduct, Product, CanBeShipped
+from product import ProductFactory, CanBeShipped
 from supplier import Supplier
 from inventory import Inventory
 from order import Order
@@ -9,7 +10,95 @@ from order import Order
 FILENAME: str = "inventory.json"
 DATA_DIR: str = os.environ.get("DATA_DIR", ".")
 FILEPATH: str = os.path.join(DATA_DIR, FILENAME)
+PRODUCTS_CSV: str = os.path.join(DATA_DIR, "products.csv")
 LINE: str = "-" * 49
+
+
+def get_positive_float(prompt: str) -> float:
+    """Keep asking until the user types a number greater than zero.
+    float() raises ValueError for text like "abc", and our own check
+    rejects zero or negative numbers, so both are handled here."""
+    while True:
+        try:
+            value = float(input(prompt))
+            if value <= 0:
+                print("Please enter a number greater than zero.")
+                continue
+            return value
+        except ValueError:
+            print("Please enter a valid number, e.g. 12.50")
+
+
+def get_non_negative_float(prompt: str) -> float:
+    """Keep asking until the user types a number that is zero or more
+    (used for weight and download size)."""
+    while True:
+        try:
+            value = float(input(prompt))
+            if value < 0:
+                print("Please enter a number that is zero or more.")
+                continue
+            return value
+        except ValueError:
+            print("Please enter a valid number, e.g. 2.5")
+
+
+def get_int(prompt: str, minimum: int) -> int:
+    """Keep asking until the user types a whole number >= minimum.
+    int() raises ValueError for text like "abc" or "2.5"."""
+    while True:
+        try:
+            value = int(input(prompt))
+            if value < minimum:
+                print(f"Please enter a whole number of {minimum} or more.")
+                continue
+            return value
+        except ValueError:
+            print("Please enter a whole number, e.g. 5")
+
+
+def get_text(prompt: str) -> str:
+    """Keep asking until the user types something that is not blank."""
+    while True:
+        value = input(prompt).strip()
+        if value:
+            return value
+        print("This field cannot be empty.")
+
+
+def load_products(path: str, inventory: Inventory,
+                  supplier: Supplier) -> None:
+    """Read products from a CSV file, build each one through the
+    ProductFactory and add it to the inventory. A bad row is reported
+    and skipped, so the rest of the file still loads."""
+    try:
+        file = open(path, newline="")
+    except FileNotFoundError:
+        print(f"Products file not found: {path}")
+    else:
+        with file:
+            reader = csv.reader(file)
+            next(reader, None)  # skip the header row
+            loaded = 0
+            for row in reader:
+                if not row:
+                    continue  # ignore blank lines
+                try:
+                    product_type, product_id, name, price, stock = row
+                    product = ProductFactory.create(
+                        product_type, product_id, name,
+                        float(price), int(stock), supplier)
+                except ValueError as e:
+                    print(f"Skipped line {reader.line_num} {row}: {e}")
+                    continue
+                if not inventory.add_product(product):
+                    print(f"Skipped line {reader.line_num}: product ID "
+                          f"{product_id} already exists.")
+                    continue
+                loaded += 1
+            print(f"{loaded} products loaded.")
+    finally:
+        print("Load attempt finished.")
 
 
 def load_inventory() -> Inventory:
@@ -45,25 +134,32 @@ def print_menu() -> None:
     print("7. Assign Supplier to Product")
     print("8. Show Supplier Details")
     print("9. Create Order")
-    print("10. Exit")
+    print("10. Load Products from CSV")
+    print("11. Exit")
     print("-----------------------------")
 
 
 def get_supplier(inventory: Inventory) -> Supplier:
-    """Reuse an existing supplier by ID, or create a new independent one."""
-    supplier_id = input("Supplier ID: ").strip()
+    """Reuse an existing supplier by ID, or create a new independent one.
+    Keeps asking until a valid supplier is entered."""
+    supplier_id = get_text("Supplier ID: ")
     supplier = inventory.find_supplier(supplier_id)
     if supplier:
         print(f"Using existing supplier: {supplier}")
         return supplier
-    name = input("Supplier Name: ").strip()
-    email = input("Supplier Contact Email: ").strip()
-    return Supplier(supplier_id, name, email)
+    name = get_text("Supplier Name: ")
+    while True:
+        email = get_text("Supplier Contact Email: ")
+        try:
+            # Supplier checks its own email rule and raises ValueError.
+            return Supplier(supplier_id, name, email)
+        except ValueError as e:
+            print(f"{e} Please try again.")
 
 
 def add_product(inventory: Inventory) -> None:
     print("\nAdd New Product")
-    product_id = input("Product ID: ").strip()
+    product_id = get_text("Product ID: ")
     if inventory.find_product(product_id):
         print("\nA product with that ID already exists.")
         return
@@ -71,25 +167,30 @@ def add_product(inventory: Inventory) -> None:
     print("\nProduct Type")
     print("1. Physical")
     print("2. Digital")
-    product_type = input("Choose type (1/2): ").strip()
-    if product_type not in ("1", "2"):
-        print("\nInvalid product type. Product not added.")
-        return
+    product_type = None
+    while product_type is None:
+        choice = input("Choose type (1/2): ").strip()
+        product_type = {"1": "physical", "2": "digital"}.get(choice)
+        if product_type is None:
+            print("Please enter 1 or 2.")
 
-    name = input("Product Name: ").strip()
+    name = get_text("Product Name: ")
+    price = get_positive_float("Price: ")
+    stock = get_int("Stock Quantity: ", minimum=0)
+    supplier = get_supplier(inventory)
+    weight = 0.0
+    download_size = 0.0
+    if product_type == "physical":
+        weight = get_non_negative_float("Weight (kg): ")
+    else:
+        download_size = get_non_negative_float("Download Size (MB): ")
     try:
-        price = float(input("Price: "))
-        stock = int(input("Stock Quantity: "))
-        supplier = get_supplier(inventory)
-        product: Product
-        if product_type == "1":
-            weight = float(input("Weight (kg): "))
-            product = PhysicalProduct(product_id, name, price, stock,
-                                      supplier, weight)
-        else:
-            size = float(input("Download Size (MB): "))
-            product = DigitalProduct(product_id, name, price, stock,
-                                     supplier, size)
+        # The factory decides which class to build; main.py only ever
+        # gets back a Product. The classes still validate as a safety net.
+        product = ProductFactory.create(product_type, product_id, name,
+                                        price, stock, supplier,
+                                        weight=weight,
+                                        download_size=download_size)
     except ValueError as e:
         print(f"\nInvalid input. Product not added. ({e})")
         return
@@ -108,11 +209,11 @@ def update_stock(inventory: Inventory) -> None:
     print("\nProduct Found:")
     print(f"Name: {product.name}")
     print(f"Current Stock: {product.stock}")
+    new_stock = get_int("\nNew Stock Quantity: ", minimum=0)
     try:
-        new_stock = int(input("\nNew Stock Quantity: "))
         inventory.update_stock(product.product_id, new_stock)
     except ValueError as e:
-        print(f"\nInvalid input. Stock not updated. ({e})")
+        print(f"\nStock not updated. ({e})")
         return
     print("\nStock updated successfully!")
 
@@ -160,11 +261,7 @@ def assign_supplier(inventory: Inventory) -> None:
     print("\nProduct Found:")
     print(f"Name: {product.name}")
     print(f"Current Supplier: {product.supplier}")
-    try:
-        supplier = get_supplier(inventory)
-    except ValueError as e:
-        print(f"\nInvalid input. Supplier not changed. ({e})")
-        return
+    supplier = get_supplier(inventory)
     inventory.assign_supplier(product.product_id, supplier)
     print("\nSupplier assigned successfully!")
 
@@ -201,11 +298,7 @@ def create_order(inventory: Inventory) -> None:
     """Build an Order. The Order creates its own OrderLines; this function
     only hands it a Product (found in the inventory) and a quantity."""
     print("\nCreate Order")
-    try:
-        order = Order(input("Order ID: ").strip())
-    except ValueError as e:
-        print(f"\nInvalid input. Order not created. ({e})")
-        return
+    order = Order(get_text("Order ID: "))
 
     print("\nAdd products to the order. Leave Product ID blank to finish.")
     while True:
@@ -216,11 +309,11 @@ def create_order(inventory: Inventory) -> None:
         if not product:
             print("Product not found.")
             continue
+        quantity = get_int(f"Quantity of {product.name}: ", minimum=1)
         try:
-            quantity = int(input(f"Quantity of {product.name}: "))
             order.add_order_line(product, quantity)
         except ValueError as e:
-            print(f"Invalid input. Line not added. ({e})")
+            print(f"Line not added. ({e})")
             continue
         print("Order line added.")
 
@@ -265,6 +358,18 @@ def main() -> None:
         elif choice == "9":
             create_order(inventory)
         elif choice == "10":
+            print(f"\nLoad Products from {os.path.basename(PRODUCTS_CSV)}")
+            suppliers = inventory.get_suppliers()
+            if suppliers:
+                names = ", ".join(str(s) for s in suppliers)
+                print(f"Existing suppliers: {names}.")
+            else:
+                print("There are no existing suppliers yet.")
+            print("Choose the supplier for these products "
+                  "(or enter a new ID to create one).")
+            supplier = get_supplier(inventory)
+            load_products(PRODUCTS_CSV, inventory, supplier)
+        elif choice == "11":
             print("\nSaving inventory before exit...")
             save_inventory(inventory)
             print("Inventory saved successfully.")
@@ -272,7 +377,7 @@ def main() -> None:
             print("Program terminated.")
             break
         else:
-            print("\nInvalid option. Please enter a number from 1 to 10.")
+            print("\nInvalid option. Please enter a number from 1 to 11.")
 
 
 if __name__ == "__main__":

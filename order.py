@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from product import Product
+from discount import DiscountStrategy, NoDiscount
 
 
 class OrderLine:
@@ -28,13 +29,30 @@ class OrderLine:
 
 class Order:
     """An order made up of OrderLine objects. The Order creates and manages
-    its own lines, so the lines live and die with the order."""
+    its own lines, so the lines live and die with the order.
 
-    def __init__(self, order_id: str) -> None:
+    The Order is GIVEN a DiscountStrategy rather than deciding the discount
+    itself (Strategy pattern), so it contains no discount if/elif logic."""
+
+    def __init__(self, order_id: str,
+                 discount: DiscountStrategy | None = None) -> None:
         if not str(order_id).strip():
             raise ValueError("Order ID cannot be empty.")
         self.order_id: str = str(order_id).strip()
         self.__order_lines: list[OrderLine] = []
+        self.__discount: DiscountStrategy = NoDiscount()
+        if discount is not None:
+            self.set_discount(discount)
+
+    @property
+    def discount(self) -> DiscountStrategy:
+        return self.__discount
+
+    def set_discount(self, discount: DiscountStrategy) -> None:
+        """Swap in a different discount strategy at any time."""
+        if not isinstance(discount, DiscountStrategy):
+            raise ValueError("Discount must be a DiscountStrategy object.")
+        self.__discount = discount
 
     @property
     def order_lines(self) -> list[OrderLine]:
@@ -56,9 +74,15 @@ class Order:
                 return True
         return False
 
-    def calculate_total(self) -> float:
-        """Ask each OrderLine for its subtotal and add them up."""
+    def calculate_subtotal(self) -> float:
+        """Total of all order lines before any discount."""
         return sum(line.calculate_subtotal() for line in self.__order_lines)
+
+    def calculate_total(self) -> float:
+        """Add up the line subtotals, then let the strategy apply the
+        discount."""
+        total = sum(line.calculate_subtotal() for line in self.__order_lines)
+        return self.__discount.apply(total)
 
     def cancel(self) -> None:
         """Cancelling the order removes its order lines with it.
@@ -71,4 +95,6 @@ class Order:
             print("  No order lines.")
         for line in self.__order_lines:
             print(f"  {line}")
+        print(f"Subtotal: ${self.calculate_subtotal():.2f}")
+        print(f"Discount: {self.__discount}")
         print(f"Total: ${self.calculate_total():.2f}")

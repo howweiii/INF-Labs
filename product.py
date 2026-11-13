@@ -21,8 +21,8 @@ class Product(ABC):
             raise ValueError("Product ID cannot be empty.")
         if not str(name).strip():
             raise ValueError("Product name cannot be empty.")
-        if price < 0:
-            raise ValueError("Price cannot be negative.")
+        if price <= 0:
+            raise ValueError("Price must be greater than zero.")
         if stock < 0:
             raise ValueError("Stock cannot be negative.")
         if not isinstance(supplier, Supplier):
@@ -135,12 +135,6 @@ class PhysicalProduct(Product, CanBeShipped):
         data["weight"] = self.__weight
         return data
 
-    @classmethod
-    def from_dict(cls, data: dict[str, object],
-                  supplier: Supplier) -> PhysicalProduct:
-        return cls(data["id"], data["name"], data["price"], data["stock"],
-                   supplier, data.get("weight", 0.0))
-
     def __str__(self) -> str:
         return f"{super().__str__()} | Weight: {self.__weight:.2f} kg"
 
@@ -173,25 +167,40 @@ class DigitalProduct(Product):
         data["download_size"] = self.__download_size
         return data
 
-    @classmethod
-    def from_dict(cls, data: dict[str, object],
-                  supplier: Supplier) -> DigitalProduct:
-        return cls(data["id"], data["name"], data["price"], data["stock"],
-                   supplier, data["download_size"])
-
     def __str__(self) -> str:
         return (f"{super().__str__()} | "
                 f"Download Size: {self.__download_size:.2f} MB")
 
 
 # ---------------------------------------------------------------------------
-# Factory used when loading from JSON
+# Factory
 # ---------------------------------------------------------------------------
-# Maps the saved "type" identifier to the class that rebuilds it.
-PRODUCT_TYPES: dict[str, type[PhysicalProduct] | type[DigitalProduct]] = {
-    "physical": PhysicalProduct,
-    "digital": DigitalProduct,
-}
+class ProductFactory:
+    """The ONE place that knows which Product subclasses exist.
+
+    Callers ask for a product by type name and get back a Product. They
+    never name PhysicalProduct or DigitalProduct themselves, so adding a
+    new product type only means changing this class (lower coupling).
+    """
+
+    @staticmethod
+    def create(product_type: str, product_id: str, name: str, price: float,
+               stock_quantity: int, supplier: Supplier,
+               weight: float = 0.0, download_size: float = 0.0) -> Product:
+        """Build a Product of the given type.
+
+        weight (kg) is used by physical products; download_size (MB) is
+        used by digital products. Each constructor validates its own data.
+        """
+        product_type = str(product_type).strip().lower()
+        if product_type == "physical":
+            return PhysicalProduct(product_id, name, price, stock_quantity,
+                                   supplier, weight)
+        elif product_type == "digital":
+            return DigitalProduct(product_id, name, price, stock_quantity,
+                                  supplier, download_size)
+        else:
+            raise ValueError(f"Unknown product type: {product_type}")
 
 
 def product_from_dict(data: dict[str, object],
@@ -205,10 +214,6 @@ def product_from_dict(data: dict[str, object],
     Data saved before suppliers existed has no "supplier_id", so it is
     given a shared placeholder "Unknown Supplier".
     """
-    product_type = data.get("type", "physical")
-    if product_type not in PRODUCT_TYPES:
-        raise ValueError(f"Unknown product type: {product_type}")
-
     supplier_id = data.get("supplier_id", UNKNOWN_SUPPLIER_ID)
     if supplier_id not in suppliers:
         if supplier_id != UNKNOWN_SUPPLIER_ID:
@@ -216,4 +221,8 @@ def product_from_dict(data: dict[str, object],
         suppliers[UNKNOWN_SUPPLIER_ID] = Supplier(
             UNKNOWN_SUPPLIER_ID, "Unknown Supplier", "unknown@example.com")
 
-    return PRODUCT_TYPES[product_type].from_dict(data, suppliers[supplier_id])
+    return ProductFactory.create(
+        data.get("type", "physical"), data["id"], data["name"],
+        data["price"], data["stock"], suppliers[supplier_id],
+        weight=data.get("weight", 0.0),
+        download_size=data.get("download_size", 0.0))
