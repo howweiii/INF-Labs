@@ -8,10 +8,6 @@ BASE_SHIPPING_COST: float = 5.00
 COST_PER_KG: float = 2.00
 UNKNOWN_SUPPLIER_ID: str = "S0"
 
-
-# ---------------------------------------------------------------------------
-# Abstract base class
-# ---------------------------------------------------------------------------
 class Product(ABC):
     """Abstract base class for every product in the inventory."""
 
@@ -31,10 +27,8 @@ class Product(ABC):
         self.__name: str = str(name).strip()
         self.__price: float = price
         self.__stock: int = stock
-        # Association: a reference to an independent Supplier object.
         self.supplier: Supplier = supplier
 
-    # Read-only access from outside the class
     @property
     def product_id(self) -> str:
         return self.__product_id
@@ -87,10 +81,6 @@ class Product(ABC):
                 f"Price: ${self.__price:.2f} | Stock: {self.__stock} | "
                 f"Supplier: {self.supplier.name}")
 
-
-# ---------------------------------------------------------------------------
-# Interface-style contract
-# ---------------------------------------------------------------------------
 class CanBeShipped(ABC):
     """Interface-style contract: any class that can be shipped must be
     able to calculate its shipping cost."""
@@ -100,10 +90,6 @@ class CanBeShipped(ABC):
         """Return the shipping cost for this object."""
         pass
 
-
-# ---------------------------------------------------------------------------
-# Concrete product types
-# ---------------------------------------------------------------------------
 class PhysicalProduct(Product, CanBeShipped):
     """A product that is stored and shipped. Adds a weight (kg)."""
 
@@ -171,10 +157,6 @@ class DigitalProduct(Product):
         return (f"{super().__str__()} | "
                 f"Download Size: {self.__download_size:.2f} MB")
 
-
-# ---------------------------------------------------------------------------
-# Factory
-# ---------------------------------------------------------------------------
 class ProductFactory:
     """The ONE place that knows which Product subclasses exist.
 

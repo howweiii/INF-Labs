@@ -15,9 +15,6 @@ LINE: str = "-" * 49
 
 
 def get_positive_float(prompt: str) -> float:
-    """Keep asking until the user types a number greater than zero.
-    float() raises ValueError for text like "abc", and our own check
-    rejects zero or negative numbers, so both are handled here."""
     while True:
         try:
             value = float(input(prompt))
@@ -30,8 +27,6 @@ def get_positive_float(prompt: str) -> float:
 
 
 def get_non_negative_float(prompt: str) -> float:
-    """Keep asking until the user types a number that is zero or more
-    (used for weight and download size)."""
     while True:
         try:
             value = float(input(prompt))
@@ -44,8 +39,6 @@ def get_non_negative_float(prompt: str) -> float:
 
 
 def get_int(prompt: str, minimum: int) -> int:
-    """Keep asking until the user types a whole number >= minimum.
-    int() raises ValueError for text like "abc" or "2.5"."""
     while True:
         try:
             value = int(input(prompt))
@@ -58,7 +51,6 @@ def get_int(prompt: str, minimum: int) -> int:
 
 
 def get_text(prompt: str) -> str:
-    """Keep asking until the user types something that is not blank."""
     while True:
         value = input(prompt).strip()
         if value:
@@ -68,9 +60,6 @@ def get_text(prompt: str) -> str:
 
 def load_products(path: str, inventory: Inventory,
                   supplier: Supplier) -> None:
-    """Read products from a CSV file, build each one through the
-    ProductFactory and add it to the inventory. A bad row is reported
-    and skipped, so the rest of the file still loads."""
     try:
         file = open(path, newline="")
     except FileNotFoundError:
@@ -185,8 +174,6 @@ def add_product(inventory: Inventory) -> None:
     else:
         download_size = get_non_negative_float("Download Size (MB): ")
     try:
-        # The factory decides which class to build; main.py only ever
-        # gets back a Product. The classes still validate as a safety net.
         product = ProductFactory.create(product_type, product_id, name,
                                         price, stock, supplier,
                                         weight=weight,
@@ -295,8 +282,6 @@ def show_supplier_details(inventory: Inventory) -> None:
 
 
 def create_order(inventory: Inventory) -> None:
-    """Build an Order. The Order creates its own OrderLines; this function
-    only hands it a Product (found in the inventory) and a quantity."""
     print("\nCreate Order")
     order = Order(get_text("Order ID: "))
 

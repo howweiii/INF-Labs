@@ -27,7 +27,6 @@ class Supplier:
 
     @classmethod
     def from_dict(cls, data: dict[str, str]) -> Supplier:
-        # Files saved without an email still load, using a placeholder.
         return cls(data["id"], data["name"],
                    data.get("contact_email", "unknown@example.com"))
 

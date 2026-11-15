@@ -2,15 +2,11 @@ import json
 import os
 
 FILENAME = "inventory.json"
-# DATA_DIR lets Docker point the file at a mounted volume (default: current folder)
 DATA_DIR = os.environ.get("DATA_DIR", ".")
 FILEPATH = os.path.join(DATA_DIR, FILENAME)
 LINE = "-" * 49
 
-# Inventory dictionary: a list of product dictionaries + a history of
-# every transaction amount (not just a running total).
 inventory = {"products": [], "transactions": []}
-
 
 def print_menu():
     print("\n----------- MENU -----------")
@@ -57,7 +53,6 @@ def add_product():
     inventory["products"].append(
         {"id": product_id, "name": name, "price": price, "stock": stock}
     )
-    # Record the value of the stock added as a transaction
     inventory["transactions"].append(
         {"product_id": product_id, "type": "add", "amount": round(price * stock, 2)}
     )
@@ -120,7 +115,6 @@ def remove_product():
         return
 
     inventory["products"].remove(product)
-    # Record the value of the stock removed as a negative transaction
     inventory["transactions"].append(
         {"product_id": product["id"], "type": "remove",
          "amount": round(-product["price"] * product["stock"], 2)}

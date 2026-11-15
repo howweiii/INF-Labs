@@ -8,8 +8,6 @@ from order import Order
 
 LINE = "-" * 49
 
-# PREDICTIONS for section 7, written before running the test:
-# product_id -> (expected get_fulfilment_info(), expected specialised line)
 PHYSICAL_INFO = "Physical product: requires storage and physical shipping."
 DIGITAL_INFO = "Digital product: delivered electronically via download."
 PREDICTIONS: dict[str, tuple[str, str]] = {
@@ -56,9 +54,6 @@ supplier = Supplier("S1", "Test Supplier", "test@example.com")
 guitar = PhysicalProduct("P1", "Guitar", 800.0, 2, supplier, 3.8)
 software = DigitalProduct("D1", "Operating System", 129.0, 10, supplier, 4500.0)
 
-# ---------------------------------------------------------------------------
-# Section 6: LSP
-# ---------------------------------------------------------------------------
 heading("1. show_product_details() with both subclasses")
 show_product_details(guitar)
 print()
@@ -68,7 +63,7 @@ heading("2. Both product types can be added to an Inventory")
 inventory = Inventory()
 assert inventory.add_product(guitar)
 assert inventory.add_product(software)
-assert not inventory.add_product(guitar)  # duplicate ID still rejected
+assert not inventory.add_product(guitar)  
 print("Both added. Duplicate ID rejected for both kinds.")
 
 heading("3. Inventory.display_all() asks each Product to display itself")
@@ -103,9 +98,6 @@ print("Removed and re-added without destroying either product.")
 
 print("\nAll LSP checks passed.")
 
-# ---------------------------------------------------------------------------
-# Section 7: Polymorphism
-# ---------------------------------------------------------------------------
 heading("7. Polymorphism: one loop over the Product collection")
 poly_inventory = Inventory()
 poly_inventory.add_product(
@@ -117,7 +109,7 @@ poly_inventory.add_product(
 
 failures = 0
 for product in poly_inventory.products:
-    # Capture what display_information() prints so it can be checked.
+
     buffer = io.StringIO()
     with redirect_stdout(buffer):
         product.display_information()

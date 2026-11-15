@@ -3,17 +3,12 @@ from __future__ import annotations
 from abc import ABC, abstractmethod
 
 class DiscountStrategy(ABC):
-    """A way of discounting an order total. Order only depends on this
-    interface, so new discounts can be added without changing Order (OCP)."""
 
     @abstractmethod
     def apply(self, total: float) -> float:
-        """Take an order total and return the discounted total."""
         pass
 
 class NoDiscount(DiscountStrategy):
-    """Returns the total unchanged."""
-
     def apply(self, total: float) -> float:
         return total
 
@@ -22,7 +17,6 @@ class NoDiscount(DiscountStrategy):
 
 
 class PercentageDiscount(DiscountStrategy):
-    """Takes a percentage off, e.g. PercentageDiscount(10) takes 10% off."""
 
     def __init__(self, percentage: float) -> None:
         if not 0 <= percentage <= 100:
@@ -37,8 +31,6 @@ class PercentageDiscount(DiscountStrategy):
 
 
 class BulkDiscount(DiscountStrategy):
-    """Takes a fixed amount off any total at or above a threshold,
-    e.g. BulkDiscount(200, 20) takes 20 off any total of 200 or more."""
 
     def __init__(self, threshold: float, amount: float) -> None:
         if threshold < 0:
@@ -59,9 +51,7 @@ class BulkDiscount(DiscountStrategy):
 
 
 class StudentDiscount(DiscountStrategy):
-    """Section 2.4: a new strategy added WITHOUT changing Order.
-    Students get 5% off, capped at a maximum saving (default $50)."""
-
+    
     RATE: float = 0.05
 
     def __init__(self, max_saving: float = 50.0) -> None:
